@@ -1,28 +1,33 @@
 package com.example.ashokchouhan.sia_project;
 
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.Toast;
 
-import com.example.ashokchouhan.sia_project.Common.Common;
-import com.example.ashokchouhan.sia_project.model.User;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class LoginActivity extends AppCompatActivity {
 
     EditText edtTicketNumber,edtName,edtDestination;
     Button btnLogin;
+
+    static final String API_KEY = "kkryhwgt7a39x98nym8p8zwm";
+    static final String API_URL = "https://apigw.singaporeair.com/api/v3/flightstatus/getbynumber";
 
 
     @Override
@@ -30,60 +35,72 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        edtTicketNumber=(EditText)findViewById(R.id.user_tkt);
-        edtName=(EditText)findViewById(R.id.user_name);
-        edtDestination=(EditText)findViewById(R.id.user_desti);
-        btnLogin=(Button)findViewById(R.id.submit_button);
-
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference table_user = database.getReference("user");
-
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
-                mDialog.setMessage("Hold On...");
-                mDialog.show();
-
-                table_user.addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-
-
-                        if(dataSnapshot.child(edtTicketNumber.getText().toString()).exists())
-                        {
-                            mDialog.dismiss();
-                            User user = dataSnapshot.child(edtTicketNumber.getText().toString()).getValue(User.class);
-                            if (user.getTicket_Number().equals(edtTicketNumber.getText().toString())&&
-                                    user.getName().equals(edtName.getText().toString())&&
-                                     user.getDestination().equals(edtDestination.getText().toString()))
-                            {
-                                Intent homeIntent = new Intent(LoginActivity.this,MainActivity.class);
-                                Common.currentUsder = user;
-                                startActivity(homeIntent);
-                                finish();
-
-                            } else {
-                                Toast.makeText(LoginActivity.this, "Ohh Sorry Sign in Failed!", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-
-                        else
-                        {
-                            mDialog.dismiss();
-                            Toast.makeText(LoginActivity.this,"Wrong Information!",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-            }
-        });
+        edtTicketNumber = (EditText) findViewById(R.id.user_tkt);
+        edtName = (EditText) findViewById(R.id.user_name);
+        edtDestination = (EditText) findViewById(R.id.user_desti);
+        btnLogin = (Button) findViewById(R.id.submit_button);
 
     }
 
+    public class Information extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+                // Creating & connection Connection with url and required Header.
+                URL url = new URL("https://apigw.singaporeair.com/api/v3/flightstatus/getbynumber");
+                HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
+                urlConnection.setRequestProperty("apikey","kkryhwgt7a39x98nym8p8zwm");
+                urlConnection.setRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestProperty("header-param_3", "value-3");
+                urlConnection.setRequestProperty("header-param_4", "value-4");
+
+                urlConnection.setRequestMethod("POST");   //POST or GET
+                urlConnection.connect();
+
+                // Create JSONObject Request
+                JSONObject jsonRequest = new JSONObject();
+                jsonRequest.put("airlineCode",edtTicketNumber);
+                jsonRequest.put("flightNumber", edtName);
+                jsonRequest.put("scheduledDepartureDate", edtDestination);
+
+                // Write Request to output stream to server.
+                OutputStreamWriter out = new OutputStreamWriter(urlConnection.getOutputStream());
+                out.write(jsonRequest.toString());
+                out.close();
+
+                // Check the connection status.
+                int statusCode = urlConnection.getResponseCode();
+                String statusMsg = urlConnection.getResponseMessage();
+
+                // Connection success. Proceed to fetch the response.
+                if (statusCode == 200) {
+                    InputStream it = new BufferedInputStream(urlConnection.getInputStream());
+                    InputStreamReader read = new InputStreamReader(it);
+                    BufferedReader buff = new BufferedReader(read);
+                    StringBuilder dta = new StringBuilder();
+                    String chunks;
+                    while ((chunks = buff.readLine()) != null) {
+                        dta.append(chunks);
+                    }
+                    String returndata = dta.toString();
+                    return returndata;
+                } else {
+                    //Handle else case
+                }
+            } catch (ProtocolException e) {
+                e.printStackTrace();
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+    }
 }

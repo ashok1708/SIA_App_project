@@ -44,7 +44,7 @@
         android:layout_marginTop="30dp"
         android:background="@drawable/border"
         android:ems="10"
-        android:hint="Your Ticket Number"
+        android:hint="Your Airlines code"
         android:inputType="text"
         android:padding="10dp" />
 
@@ -58,8 +58,8 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
         android:background="@drawable/border"
-        android:hint="Name"
-        android:inputType="textPersonName"
+        android:hint="Flight Number"
+        android:inputType="text"
         android:padding="10dp" />
 
 
@@ -73,8 +73,8 @@
         android:layout_marginTop="15dp"
         android:background="@drawable/border"
         android:ems="10"
-        android:hint="Destination"
-        android:inputType="text"
+        android:hint="DepartureDate [ yyyy-MM-dd]"
+        android:inputType="date"
         android:padding="10dp" />
 
 
