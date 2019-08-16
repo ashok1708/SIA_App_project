@@ -1,10 +1,14 @@
 package com.example.ashokchouhan.sia_project;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 
 
 import org.json.JSONObject;
@@ -25,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
 
     EditText edtTicketNumber,edtName,edtDestination;
     Button btnLogin;
+    ProgressBar progressBar;
 
     static final String API_KEY = "kkryhwgt7a39x98nym8p8zwm";
     static final String API_URL = "https://apigw.singaporeair.com/api/v3/flightstatus/getbynumber";
@@ -40,18 +45,34 @@ public class LoginActivity extends AppCompatActivity {
         edtDestination = (EditText) findViewById(R.id.user_desti);
         btnLogin = (Button) findViewById(R.id.submit_button);
 
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
+                mDialog.setMessage("Hold On...");
+                mDialog.show();
+                new Information().execute();
+            }
+        });
+
     }
 
     public class Information extends AsyncTask<String, String, String> {
+
+        protected void onPreExecute() {
+            Intent mainIntent = new Intent(LoginActivity.this,MainActivity.class);
+            startActivity(mainIntent);
+        }
 
         @Override
         protected String doInBackground(String... params) {
 
             try {
                 // Creating & connection Connection with url and required Header.
-                URL url = new URL("https://apigw.singaporeair.com/api/v3/flightstatus/getbynumber");
+                URL url = new URL(API_URL);
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-                urlConnection.setRequestProperty("apikey","kkryhwgt7a39x98nym8p8zwm");
+
+                urlConnection.setRequestProperty("apikey",API_KEY);
                 urlConnection.setRequestProperty("Content-Type", "application/json");
                 urlConnection.setRequestProperty("header-param_3", "value-3");
                 urlConnection.setRequestProperty("header-param_4", "value-4");
@@ -61,9 +82,9 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Create JSONObject Request
                 JSONObject jsonRequest = new JSONObject();
-                jsonRequest.put("airlineCode",edtTicketNumber);
-                jsonRequest.put("flightNumber", edtName);
-                jsonRequest.put("scheduledDepartureDate", edtDestination);
+                jsonRequest.put("airlineCode",edtTicketNumber.getText().toString());
+                jsonRequest.put("flightNumber", edtName.getText().toString());
+                jsonRequest.put("scheduledDepartureDate", edtDestination.getText().toString());
 
                 // Write Request to output stream to server.
                 OutputStreamWriter out = new OutputStreamWriter(urlConnection.getOutputStream());
