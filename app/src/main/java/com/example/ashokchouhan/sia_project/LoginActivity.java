@@ -48,10 +48,10 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
-                mDialog.setMessage("Hold On...");
-                mDialog.show();
-                new Information().execute();
+
+                new Information().onPreExecute();
+                Intent mainIntent = new Intent(LoginActivity.this,MainActivity.class);
+                startActivity(mainIntent);
             }
         });
 
@@ -60,8 +60,10 @@ public class LoginActivity extends AppCompatActivity {
     public class Information extends AsyncTask<String, String, String> {
 
         protected void onPreExecute() {
-            Intent mainIntent = new Intent(LoginActivity.this,MainActivity.class);
-            startActivity(mainIntent);
+            final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
+            mDialog.setMessage("Hold On...");
+            mDialog.show();
+
         }
 
         @Override
