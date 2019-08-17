@@ -44,13 +44,18 @@ public class LoginActivity extends AppCompatActivity {
         edtTicketNumber = (EditText) findViewById(R.id.user_tkt);
         edtName = (EditText) findViewById(R.id.user_name);
         edtDestination = (EditText) findViewById(R.id.user_desti);
-        btnLogin = (Button) findViewById(R.id.submit_button);
+        btnLogin = (Button)findViewById(R.id.submit_button);
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
+                mDialog.setMessage("Hold On...");
+                mDialog.show();
+
                 new Information().execute();
+
 
             }
         });
@@ -63,7 +68,7 @@ public class LoginActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            super.onPreExecute();
+
 
         }
 
@@ -98,8 +103,13 @@ public class LoginActivity extends AppCompatActivity {
                 int statusCode = urlConnection.getResponseCode();
                 String statusMsg = urlConnection.getResponseMessage();
 
+
                 // Connection success. Proceed to fetch the response.
                 if (statusCode == 200) {
+
+
+                    Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+                    startActivity(mainIntent);
 
                    /* InputStream it = new BufferedInputStream(urlConnection.getInputStream());
                     InputStreamReader read = new InputStreamReader(it);
@@ -111,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
                     }
                     String returndata = dta.toString();
                     return returndata;*/
-                    Toast.makeText(LoginActivity.this, statusMsg, Toast.LENGTH_SHORT).show();
+
 
                 } else {
                     Toast.makeText(LoginActivity.this, "Ohh Sorry Sign in Failed!", Toast.LENGTH_SHORT).show();
@@ -131,8 +141,7 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String response) {
 
-            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
-            startActivity(mainIntent);
+
 
 
         }
