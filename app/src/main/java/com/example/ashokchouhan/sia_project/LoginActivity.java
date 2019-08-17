@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 
 import org.json.JSONObject;
@@ -27,7 +28,7 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class LoginActivity extends AppCompatActivity {
 
-    EditText edtTicketNumber,edtName,edtDestination;
+    EditText edtTicketNumber, edtName, edtDestination;
     Button btnLogin;
     ProgressBar progressBar;
 
@@ -49,20 +50,20 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                new Information().onPreExecute();
-                Intent mainIntent = new Intent(LoginActivity.this,MainActivity.class);
-                startActivity(mainIntent);
+                new Information().execute();
+
             }
         });
 
     }
 
+
     public class Information extends AsyncTask<String, String, String> {
 
+
+        @Override
         protected void onPreExecute() {
-            final ProgressDialog mDialog= new ProgressDialog(LoginActivity.this);
-            mDialog.setMessage("Hold On...");
-            mDialog.show();
+            super.onPreExecute();
 
         }
 
@@ -73,18 +74,18 @@ public class LoginActivity extends AppCompatActivity {
                 // Creating & connection Connection with url and required Header.
                 URL url = new URL(API_URL);
                 HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-
-                urlConnection.setRequestProperty("apikey",API_KEY);
+                urlConnection.setDoOutput(true);
+                urlConnection.setRequestProperty("apikey", API_KEY);
                 urlConnection.setRequestProperty("Content-Type", "application/json");
-                urlConnection.setRequestProperty("header-param_3", "value-3");
-                urlConnection.setRequestProperty("header-param_4", "value-4");
+                urlConnection.setRequestProperty("X-Originating-IP", "49.36.134.32");
+
 
                 urlConnection.setRequestMethod("POST");   //POST or GET
                 urlConnection.connect();
 
                 // Create JSONObject Request
                 JSONObject jsonRequest = new JSONObject();
-                jsonRequest.put("airlineCode",edtTicketNumber.getText().toString());
+                jsonRequest.put("airlineCode", edtTicketNumber.getText().toString());
                 jsonRequest.put("flightNumber", edtName.getText().toString());
                 jsonRequest.put("scheduledDepartureDate", edtDestination.getText().toString());
 
@@ -99,7 +100,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Connection success. Proceed to fetch the response.
                 if (statusCode == 200) {
-                    InputStream it = new BufferedInputStream(urlConnection.getInputStream());
+
+                   /* InputStream it = new BufferedInputStream(urlConnection.getInputStream());
                     InputStreamReader read = new InputStreamReader(it);
                     BufferedReader buff = new BufferedReader(read);
                     StringBuilder dta = new StringBuilder();
@@ -108,9 +110,11 @@ public class LoginActivity extends AppCompatActivity {
                         dta.append(chunks);
                     }
                     String returndata = dta.toString();
-                    return returndata;
+                    return returndata;*/
+                    Toast.makeText(LoginActivity.this, statusMsg, Toast.LENGTH_SHORT).show();
+
                 } else {
-                    //Handle else case
+                    Toast.makeText(LoginActivity.this, "Ohh Sorry Sign in Failed!", Toast.LENGTH_SHORT).show();
                 }
             } catch (ProtocolException e) {
                 e.printStackTrace();
@@ -124,6 +128,16 @@ public class LoginActivity extends AppCompatActivity {
 
             return null;
         }
+        @Override
+        protected void onPostExecute(String response) {
+
+            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(mainIntent);
+
+
+        }
+
 
     }
+
 }
