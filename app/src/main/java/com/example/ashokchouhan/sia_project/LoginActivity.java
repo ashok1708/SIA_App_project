@@ -66,11 +66,7 @@ public class LoginActivity extends AppCompatActivity {
     public class Information extends AsyncTask<String, String, String> {
 
 
-        @Override
-        protected void onPreExecute() {
 
-
-        }
 
         @Override
         protected String doInBackground(String... params) {
